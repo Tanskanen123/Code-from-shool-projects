@@ -1,0 +1,185 @@
+
+//Tämän koodi tehtiin Visual Studiossa ja sen 
+//tarkoitus on kokeilla Google Testin toimintaa.
+
+//This code was made in Visual Studio and it's purpose
+//is to try out Google Test
+
+
+
+#include "pch.h"
+#include<gtest/gtest.h>
+#include <iostream>
+#include <cmath>
+#include <ctype.h>
+#include <windows.h>
+
+using namespace std;
+
+
+//Päivämääräkäsittelyluokka Date
+struct Date {
+private:
+	//Tarkistetaan onko karkausvuosi
+	bool isLeapYear(int vuosi) {
+		if (vuosi % 4 == 0) {
+			return true;
+		}
+		else { return false; }
+	};
+public:
+	int paiva = 0;
+	int kuukausi = 0;
+	int vuosi = 0;
+	bool karkausVuosi = false;
+
+	int seuraavaPaiva = 0;
+	int seuraavaKuukausi = 0;
+	int seuraavaVuosi = 0;
+
+	//päivämäärän kysely/asetus
+	int mikaPaiva() {
+
+		alku:
+		int x = 0;
+		cout << "Monesko vuosi?" << endl;
+		cin >> x;
+		vuosi = x;
+		karkausVuosi = isLeapYear(x);
+
+		cout << "Monesko kuukausi? (1-12)" << endl;
+		cin >> x;
+		if (x < 13) {
+			kuukausi = x;
+		}
+		else { cout << "Kuukausi ei kelpaa." << endl; goto alku; }
+
+		cout << "Monesko paiva?" << endl;
+		cin >> x;
+		if (x < 29 && x > 0) {paiva = x;}
+		if (x == 29 && kuukausi == 2 && karkausVuosi) {paiva = x;}
+		if (x <= 30 && kuukausi != 2){ paiva = x; }
+		if (x == 31 && kuukausi != 2 && kuukausi != 4 && kuukausi != 6 && kuukausi != 9 && kuukausi != 11) { paiva = x; }
+
+		if(paiva != x){ cout << "Paivamaara ei kelpaa." << endl; goto alku; }
+
+		cout << "Paivamaara on " << paiva << "." << kuukausi << "." << vuosi << endl;
+		return 0;
+	}
+
+	//Seuraavien päivämäärien lasku
+	//Molemmat funktiot käyttää samaa logiikkaa
+	int nextDay() {
+		//Tarkistetaan onko paiva kuukauden viimeinen
+		if (paiva == 29 && kuukausi == 2) { seuraavaPaiva == 1; seuraavaKuukausi = kuukausi + 1;}
+		if (paiva == 28 && kuukausi == 2 && karkausVuosi == false) { seuraavaPaiva = 1; seuraavaKuukausi = kuukausi + 1;}
+		if (paiva == 30){
+			if (kuukausi == 4 || kuukausi == 6 || kuukausi == 9 || kuukausi == 11) { seuraavaPaiva = 1; seuraavaKuukausi = kuukausi + 1;}
+		}
+		if (paiva == 31){
+			if (kuukausi == 1 || kuukausi == 3 || kuukausi == 5 || kuukausi == 7 || kuukausi == 8 || kuukausi == 10 || kuukausi == 12) {
+				seuraavaPaiva = 1; seuraavaKuukausi = kuukausi + 1;
+			}
+		}
+		//Jos paiva ei ollut kuukauden viimeinen niin +1
+		if (seuraavaPaiva != 1) { seuraavaPaiva = paiva + 1; seuraavaKuukausi = kuukausi; seuraavaVuosi = vuosi; }
+		//Katsotaan vaihtuiko vuosi
+		if (seuraavaKuukausi == 13) { seuraavaVuosi = vuosi + 1; seuraavaKuukausi = 1;}
+		
+		//Tulostetaan seuraava päivämäärä
+		cout << "Paivan jalkeen: " << seuraavaPaiva << "." << seuraavaKuukausi << "." << seuraavaVuosi << endl;
+
+	return 0;
+	}
+	int weekLater() {
+		seuraavaPaiva = paiva + 7;
+		seuraavaKuukausi = kuukausi;
+		seuraavaVuosi = vuosi;
+
+		//Tarkistetaan vaihtuiko kuukausi
+		if (seuraavaPaiva > 29 && kuukausi == 2) { seuraavaPaiva == seuraavaPaiva - 29; seuraavaKuukausi = kuukausi + 1; }
+		if (seuraavaPaiva > 28 && kuukausi == 2 && karkausVuosi == false) {
+			seuraavaPaiva = seuraavaPaiva - 28; seuraavaKuukausi = kuukausi + 1; }
+		if (seuraavaPaiva > 30) {
+			if (kuukausi == 4 || kuukausi == 6 || kuukausi == 9 || kuukausi == 11) { 
+				seuraavaPaiva = seuraavaPaiva-30; seuraavaKuukausi = kuukausi + 1; }
+		}
+		if (seuraavaPaiva > 31) {
+			if (kuukausi == 1 || kuukausi == 3 || kuukausi == 5 || kuukausi == 7 || kuukausi == 8 || kuukausi == 10 || kuukausi == 12) {
+				seuraavaPaiva = seuraavaPaiva-31; seuraavaKuukausi = kuukausi + 1;
+			}
+		}
+		//Katsotaan vaihtuiko vuosi
+		if (seuraavaKuukausi == 13) { seuraavaVuosi = vuosi + 1; seuraavaKuukausi = 1; }
+		//Tulostetaan seuraava päivämäärä
+		cout <<"Viikon jalkeen: " << seuraavaPaiva << "." << seuraavaKuukausi << "." << seuraavaVuosi << endl;
+
+		return 0;
+	}
+
+	//Oletuskonstruktori
+	Date(){}
+
+	//Parametrilliinen konstruktori
+	Date(int x, int y, int z) {
+		paiva = x;
+		kuukausi = y;
+		vuosi = z;
+	}
+	//Tulostetaan päivämäärä 
+	void printDate() {
+		//Lisätään väriä tulostukseen
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		SetConsoleTextAttribute(hConsole, 12);
+		cout <<"Paivamaara tyylikkaasti ilmaistuna: " << paiva << "." << kuukausi << "." << vuosi << endl;
+		SetConsoleTextAttribute(hConsole, 15);
+	}
+};
+
+//Luodaan toinen struct
+//Tätä hyödynnetään googleTesteissä
+//Nyt ei tarvitse luoda uutta Date:a jokaiseen testiin
+struct Date_test : testing::Test {
+	Date* kokeilu;
+	Date_test() {
+		kokeilu = new Date;
+	}
+
+	~Date_test() {
+		delete kokeilu;
+	}
+};
+
+
+//Google testi
+
+//Tarkistetaan, onko paivan arvo aluksi 0
+TEST_F(Date_test, paiva_on_0_aluksi) {
+  EXPECT_EQ(0, kokeilu->paiva);
+}
+//Onko karkausVuosi aluksi false?
+TEST_F(Date_test, karkausvuosi_oletusarvo) {
+	EXPECT_FALSE(kokeilu->karkausVuosi);
+}
+//Pitäisi antaa 1.0.0
+TEST_F(Date_test, vailla_huomista) {
+	EXPECT_EQ(0, kokeilu->nextDay());
+}
+TEST_F(Date_test, viikon_jalkeen) {
+	EXPECT_EQ(0, kokeilu->weekLater());
+}
+
+//Perusohjelmassa kutsutaan Daten funktioita
+int main(int argc, char* argv[]) {
+	testing::InitGoogleTest(&argc, argv);
+
+	//Asetetaan päivämäärä
+	Date paivamaara(23, 6, 2001);
+
+	//Kutsutaan eri funktioita
+	paivamaara.printDate();
+	paivamaara.nextDay();
+	paivamaara.weekLater();
+
+	return RUN_ALL_TESTS();
+}
