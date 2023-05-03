@@ -1,0 +1,704 @@
+
+//Tämän koodin tarkoitus on matkia Grepin toimintaa. 
+//Se tehtiin Visual Studiossa.
+
+//This code was made to imitade Grep and a few of it's commands. 
+// It was made in Visual Studio
+
+#include<iostream>
+#include<string>
+#include<fstream>
+#include <string.h>
+#include<algorithm>
+using namespace std;
+
+// i niinkuin inkrementti
+int i1();
+int i2(int argc, char* argv[]);
+int i3(int argc, char* argv[]);
+int i4(int argc, char* argv[]);
+
+//Alla olevia aliohjelmia käytetään inkrementissä 4
+// Aliohjelmia on paljon, mutta ne ovat hyvin samanlaisia keskenään
+//i3 sisältyy myös aliohjelmaan i4
+bool badcom(string com);
+int r(int argc, char* argv[]);
+int i(int argc, char* argv[]);
+int lr(int argc, char* argv[]);
+int li(int argc, char* argv[]);
+int ri(int argc, char* argv[]);
+int ro(int argc, char* argv[]);
+int oi(int argc, char* argv[]);
+int lor(int argc, char* argv[]);
+int ori(int argc, char* argv[]);
+int ril(int argc, char* argv[]);
+int ilo(int argc, char* argv[]);
+int lori(int argc, char* argv[]);
+
+int main(int argc, char* argv[]) {
+
+	//Katsotaan kuinka monta argumenttia annettiin
+	//Kutsutaan sen perusteella sopivaa aliohjelmaa
+
+	if (argc < 3) {
+		i1();
+	}
+	if(argc == 3) {
+		i2(argc, argv);
+	}
+	if (argc == 4) {
+		i4(argc, argv); 
+	}
+	if (argc > 4) {
+		cout << "Too many commands!" << endl;
+		return 0;
+	}
+
+	return 0;
+}
+
+int i1() {
+	//Tässä on ekan inkrementin tehtävä
+	string name;
+	string search;
+
+	cout << "Give a string from which to search for: ";
+	getline(cin, name);
+
+	cout << "Give search string: ";
+	getline(cin, search);
+
+	size_t nPos = name.find(search, 0);
+
+	if (name.find(search) != string::npos) {
+		while (nPos != string::npos) {
+			cout << "\"" << search << "\" found in \"" << name << "\" in position " << nPos << endl;
+			nPos = name.find(search, nPos + 1);
+		}
+	}
+
+	else {
+		cout << "\"" << search << "\" NOT found in \"" << name << "\"";
+	}
+
+	return 0;
+}
+
+int i2(int argc, char* argv[]) {
+	//Toisen inkrementin tehtävä
+	//Tämän inkrementin rankoa käytetään lähes kaikissa i4 aliohjelmissa
+	ifstream inFile;
+	inFile.open(argv[2], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+
+	string str;
+
+	while (getline(inFile, str)) {
+		if (str.find(argv[1]) != string::npos) {
+			cout << str << endl;
+		}
+	}
+	return 0;
+}
+
+int i3(int argc, char* argv[]) {
+
+	if (0 == strcmp(argv[1], "-olo") ||  0 == strcmp(argv[1], "-ool")) {
+		//Sisältää kaikki alempana olevat vaihtoehdot
+		ifstream inFile;
+		inFile.open(argv[3], ios::in);
+
+		if (!inFile) {
+			cout << "Unable to find file! Is the file in the same folder with me?";
+			return 0;
+		}
+		string str;
+		int linenum = 0;
+		int lineamo = 0;
+
+		while (getline(inFile, str)) {
+			linenum++;
+			if (str.find(argv[2]) != string::npos) {
+				cout << linenum << str << endl;
+				lineamo++;
+			}
+		}
+		cout << "Occurrences of lines containing \"" << argv[2] << "\" : " << lineamo;
+		return 0;
+	}
+	if (0 == strcmp(argv[1], "-ol")) {
+		//Löytyneiden rivien numerot
+		ifstream inFile;
+		inFile.open(argv[3], ios::in);
+
+		if (!inFile) {
+			cout << "Unable to find file! Is the file in the same folder with me?";
+			return 0;
+		}
+		string str;
+		int linenum = 0;
+
+		while (getline(inFile, str)) {
+			linenum++;
+			if (str.find(argv[2]) != string::npos) {
+				cout << linenum << str << endl;
+			}
+		}
+		return 0;
+	}
+	if (0 == strcmp(argv[1], "-oo")) {
+		//Löytyneiden rivien määrä
+		ifstream inFile;
+		inFile.open(argv[3], ios::in);
+
+		if (!inFile) {
+			cout << "Unable to find file! Is the file in the same folder with me?";
+			return 0;
+		}
+		string str;
+		int lineamo = 0;
+
+		while (getline(inFile, str)) {
+			if (str.find(argv[2]) != string::npos) {
+				cout << str << endl;
+				lineamo++;
+			}
+		}
+		cout << "Occurrences of lines containing \"" << argv[2] << "\" : " << lineamo;
+		return 0;
+	}
+	else {
+		cout << "Invalid command after filename!" << endl;
+	}
+
+	return 0;
+}
+
+int i4(int argc, char* argv[]) {
+
+	//i4 kaikessa yksinkertaisuudessaan
+	//katsoo mitä käskyjä on annettu ja
+	//sen perusteella kutsuu sopivaa funktiota
+
+	//Ensin katsotaan onko epäpätevä käsky, esim -orrr tai muuta
+	//jos ei ole epäpätevä, sitten aletaan kutsua aliohjelmia else-osassa
+
+	string com = argv[1];
+	if (badcom(com)) {
+		cout << "Invalid command!" << endl;
+	}
+	else { // Jos järjestystä ei huomioida, mahdollisia käskyjä on 10
+		//Selvitetään käskyn pituus ja kutsutaan sen perusteella funktiota.
+
+		//jos käsky on siis -oo tai -ol, niin katsotaan vain viimeistä kirjainta
+		if (com.length() == 3) {
+			if (com[2] == 'o' || com[2] == 'l') {
+				i3(argc, argv);
+				return 0;
+			}
+			if (com[2] == 'r') {
+				r(argc, argv);
+				return 0;
+			}
+			if (com[2] == 'i') {
+				i(argc, argv);
+				return 0;
+			}
+		}
+
+		//Jos käsky on pituusluokkaa -olr tai vastaava, selvitetään sen sisältämät kirjaimet ja 
+		//kutsutaan niiden perusteella sopivaa aliohjelmaa
+
+		if (com.length() == 4) {
+			char a = com[2];
+			char b = com[3];
+			if ((a == 'l' && b == 'r') || (a == 'r' && b == 'l')) {
+				lr(argc, argv);
+				return 0;
+			}
+			if ((a == 'l' && b == 'i') || (a == 'i' && b == 'l')) {
+				li(argc, argv);
+				return 0;
+			}
+			if ((a == 'r' && b == 'i') || (a == 'i' && b == 'r')) {
+				ri(argc, argv);
+				return 0;
+			}
+			if ((a == 'o' && b == 'r') || (a == 'r' && b == 'o')) {
+				ro(argc, argv);
+				return 0;
+			}
+			if ((a == 'o' && b == 'i') || (a == 'i' && b == 'o')) {
+				oi(argc, argv);
+				return 0;
+			}
+			if ((a == 'l' && b == 'o') || (a == 'o' && b == 'l')) {
+				i3(argc, argv);
+				return 0;
+			}
+
+		}
+
+		//Tänne mennään jos komento on pituudeltaan 5, eli esim. -olri
+		//Ollaan tällä kertaa järkevämpiä ja katsotaan vain mikä käsky puuttuu
+		//Esim -olri:sta puuttuu o.
+		//Tällä logiikalla yhdistelmiä on vain 4
+		if (com.length() == 5) {
+			if (com.find('r') == string::npos) {
+				ilo(argc, argv);
+				return 0;
+			}
+			if (com.find('i') == string::npos) {
+				lor(argc, argv);
+				return 0;
+			}
+			if (com.find('l') == string::npos) {
+				ori(argc, argv);
+				return 0;
+			}
+			//Koska com sisältää jo 'o', .find ei toimi
+			int count = 2;
+			for (int i = 2; i < com.length(); i++) {
+				if (com[i] != 'o') {
+					count++;
+				}
+			}
+			if (count == 5) {
+				ril(argc, argv);
+				return 0;
+			}
+		}
+
+		//Jos funktio sisältää yli 5 kirjainta niin sen täytyy olla jokin -olori:n yhdistelmä
+		//Muuten badcom() olisi napannut sen
+		//Ei onneksi tarvitse selvittää mitään tässä vaiheessa
+		//Yhdistetään vain kaikki optiot yhdeksi isoksi aliohjelmaksi 
+
+		if (com.length() == 6) {
+			lori(argc, argv);
+			return 0;
+		}
+
+		//Varmuuden vuoksi
+		else {
+			cout << "Error at i4!" << endl;
+		}
+	}
+
+	return 0;
+}
+
+bool badcom(string com) {
+	//tässä aliohjelmassa katsotaan onko käsky huono, jos on niin palautetaan true
+	
+	//katsotaan alkaako käsky merkeillä -o
+	string g = "-o";
+	if (g[0] != com[0] || g[1] != com[1]) {
+		return true;
+	}
+	//tarkistetaan vielä että merkkien -o jälkeen tulee jotain
+	if (com.length() < 3) {
+		return true;
+	}
+
+	//katsotaan onko käskyssä yhtäkää merkkiä joka EI ole o, l, r tai i
+	for (int i = 2; i < com.length(); i++) {
+		if (com[i] != 'o' && com[i] != 'l' && com[i] != 'r' && com[i] != 'i') {
+			return true;
+		}
+	}
+
+	//jos on edes yksi toistuva kirjain, niin tiedetään käskyn olevan huono
+	//ekoja merkkejä -o ei oteta huomioon
+	//lasketaan 0:sta joten eka merkki jota katsotaan on com[2] koska com[1] on o;
+
+	for (int i = 2; i < com.length(); i++) {
+		for (int j = i + 1; j < com.length(); j++) {
+			if (com[i] == com[j]) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+int r(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+
+	string str;
+
+	while (getline(inFile, str)) {
+		if (str.find(argv[2]) == string::npos) {
+			cout << str << endl;
+		}
+	}
+	return 0;
+}
+
+int i(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+
+	string str;
+	string str1;
+	string key = argv[2];
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) != string::npos) {
+			cout << str << endl;
+		}
+	}
+	return 0;
+}
+
+int lr(int argc, char* argv[]) {
+
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	int linenum = 0;
+
+	while (getline(inFile, str)) {
+		linenum++;
+		if (str.find(argv[2]) == string::npos) {
+			cout << linenum << str << endl;
+		}
+	}
+	return 0;
+}
+
+int li(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	int linenum = 0;
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		linenum++;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) != string::npos) {
+			cout <<linenum << str << endl;
+		}
+	}
+	return 0;
+}
+
+int ri(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+
+	string str;
+	string str1;
+	string key = argv[2];
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) == string::npos) {
+			cout << str << endl;
+		}
+	}
+	return 0;
+}
+
+int ro(int argc, char* argv[]) {
+	//Löytyneiden rivien määrä
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	int lineamo = 0;
+
+	while (getline(inFile, str)) {
+		if (str.find(argv[2]) == string::npos) {
+			cout << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines NOT containing \"" << argv[2] << "\" : " << lineamo;
+	return 0; 
+}
+
+int oi(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+	int lineamo = 0;
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) != string::npos) {
+			cout << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines containing \"" << argv[2] << "\" : " << lineamo;
+
+	return 0;
+}
+
+int lor(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	int linenum = 0;
+	int lineamo = 0;
+
+	while (getline(inFile, str)) {
+		linenum++;
+		if (str.find(argv[2]) == string::npos) {
+			cout << linenum << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines NOT containing \"" << argv[2] << "\" : " << lineamo;
+	return 0;
+}
+
+int ori(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+	int lineamo = 0;
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) == string::npos) {
+			cout << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines containing \"" << argv[2] << "\" : " << lineamo;
+
+	return 0;
+}
+
+int ril(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	int linenum = 0;
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		linenum++;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) == string::npos) {
+			cout << linenum << str << endl;
+		}
+	}
+	return 0;
+}
+
+int ilo(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+	int lineamo = 0;
+	int linenum = 0;
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		linenum++;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) != string::npos) {
+			cout << linenum << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines containing \"" << argv[2] << "\" : " << lineamo;
+
+	return 0;
+}
+
+int lori(int argc, char* argv[]) {
+	ifstream inFile;
+	inFile.open(argv[3], ios::in);
+
+	if (!inFile) {
+		cout << "Unable to find file! Is the file in the same folder with me?";
+		return 0;
+	}
+	string str;
+	string str1;
+	string key = argv[2];
+	int lineamo = 0;
+	int linenum = 0;
+
+	//Luodaan kopio hakusanasta ja lauseesta
+	//muutetaan molemmat pienellä kirjoitetuksi
+	//sen jälkeen verrataan ja jos on osuma, tulostetaan alkuperäinen lause
+
+	for_each(key.begin(), key.end(), [](char& c) {
+		c = tolower(c);
+		});
+
+	while (getline(inFile, str)) {
+		str1 = str;
+		linenum++;
+		for_each(str1.begin(), str1.end(), [](char& c) {
+			c = tolower(c);
+			});
+
+		if (str1.find(key) == string::npos) {
+			cout << linenum << str << endl;
+			lineamo++;
+		}
+	}
+	cout << "Occurrences of lines NOT containing \"" << argv[2] << "\" : " << lineamo;
+
+	return 0;
+}
