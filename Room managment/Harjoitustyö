@@ -1,0 +1,692 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+/*Yksittäinen huone ja kaaikki siihen liittyvät tiedot, alussa kaikki huoneet
+ovat varattuja kahden hengen huoneita, ja ohjelman alussa arvotaan mitkä kaikki niistä ovatkin 
+vapaita*/
+struct Huone {
+    bool vapaus = 0;
+    bool yksiHenki = 0;
+    double hinta = 150;
+
+    //oidenMaara on öiden määrä, eli kuinka pitkäksi aikaa huone on varattu
+    int oidenMaara = 0;
+
+    //Varauksen numero ja nimi määritellään käyttäjän mukaan jos huone varataan
+    int varauksenNumero = 0;
+    string varauksenNimi;
+};
+
+//Satunnainen määrä huoneita, jotka otetaan käyttöön ohjelmassa, näistä puolet tulee 
+//olemaan yhden hengen huoneita
+int maara = rand() % 260 + 40;
+
+//Huoneiden korkein mahdollinen määrä, näistä otetaan arvon maara verran käyttöön.
+Huone Huoneet[300];
+
+//Varaus varaa huoneen
+void Varaus(int x);
+
+//Luettelo luettelee varaukset käyttäjälle. Sitä käytetään
+//siinä kohtaa jos käyttäjä haluaa poistaa varauksia
+void Luettelo();
+
+//Luodaan varausnumero
+int varausnumero = rand() % 90000 + 10000;
+
+//Luodaan varaajan nimi
+string varaajanNimi;
+
+//Varaus numero ja nimi on siis käyttäjä kohtaisia
+
+int main() {
+
+    //Varmistetaan, että maara on tasaluku
+    if (maara % 2 != 0) {
+        maara = maara + 1;
+    }
+
+    //Arvotaan vapaiden huoneiden määrä
+    //Todennäköisyys, että jokin huone on vapaa, on 25%
+    for (int i = 1; i <= maara; i++) {
+
+        int r = rand() % 4;
+
+        if (r < 1) {
+            Huoneet[i].vapaus = 1;
+        }
+    }
+
+    //Tehdään puolet huoneista yhden hengen huoneiksi ja muutetaan hintaa
+    for (int i = 1; i <= maara / 2; i++) {
+
+        Huoneet[i].yksiHenki = 1;
+        Huoneet[i].hinta = 100;
+    }
+
+    //Arvotaan huoneiden alennus, m on arvottu luku, jolla alennus päätetään
+    //Ohjelmalla on 2/3 mahdollisuus antaa alennus
+    for (int i = 1; i <= maara; i++) {
+        int m;
+        m = rand() % 3;
+        if (m == 1) {
+            Huoneet[i].hinta = Huoneet[i].hinta * 0.9;
+        }
+        if (m == 2) {
+            Huoneet[i].hinta = Huoneet[i].hinta * 0.8;
+        }
+    }
+
+    //Tässä hotellissa huoneiden laskeminen alkaa 1:stä, joten huonetta 0 ei ole
+    //Sitä ei kuitenkaan voi poistaa, joten tehdään siitä varattu
+    //Nyt se ei voi ilmestyä käyttäjälle
+    Huoneet[0].vapaus = 0;
+
+    cout << "Tervetuloa!" << endl << endl;
+
+
+    //Kerrotaan varausnumero
+
+    cout << endl << "Varausnumerosi on " << varausnumero << "." << endl << endl;
+
+    //Kysytään nimeä
+
+    cout << "Mika on nimenne? " << endl;
+    getline(cin, varaajanNimi);
+    cout << endl;
+
+    int x = 0;
+
+    while (x != 5) {
+
+        //Alku on täällä paluu pisteenä
+        //Näitä alkuja tulee näkumään lisää
+        //Kaikilla aluilla on sama rooli joka on toimia 
+        //paluu pisteenä, lähinnä silloin kun jokin menee pieleen
+    alku:
+
+        //Kysytään toimintoa käyttäjältä
+        //Tulostetaan valikko
+
+        cout << endl;
+        cout << "Mita haluaisitte tehda?" << endl;
+        cout << "Syota numero 1 - 5" << endl;
+        cout << "1: Katsele huoneita." << endl;
+        cout << "2. Katso meidan suosittelema huone." << endl;
+        cout << "3. Katso varauksia." << endl;
+        cout << "4. Poista varaus." << endl;
+        cout << "5. Poistu valikosta. " << endl;
+
+        //Tässä luodaan viiva. Se koristaa valikkoa.
+
+        for (int i = 0; i < 60; i++) {
+            cout << "--";
+        }
+  
+        cin >> x;
+
+        //Jos x on jokin muu kuin luku, niin tämä ratkaisee tilanteen
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000000, '\n');
+            cout << endl << "Syottakaa numero 1, 2, 3 tai 4. Jos haluatte poistua painakaa 5.";
+            cout << endl;
+            goto alku;
+        }
+
+        if (x == 1) {
+            int n;
+
+            cout << endl;
+            cout << "Haluatteko yhden- vai kahden hengen huoneen?"<<endl;
+            cout << "1 = Yhden hengen huone." << endl;
+            cout << "2 = Kahden hengen hone" << endl;
+            cout << "3 = Takaisin valikkoon" << endl;
+            cin >> n;
+
+            //Virheentarkastus
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(1000000, '\n');
+                cout << endl << "Virheellien syote";
+                cout << endl;
+                goto alku;
+            }
+
+            if (n == 3) {
+                goto alku;
+            }
+
+            //Tarkistetaan, että sopivia vapaita huoneita on, sitten 
+            //tulostetaan luettelo sopivista huoneista ja kutsutaan varaus funktiota
+            //
+            //h on muuttuja jolla lasketaan varattuja huoneita, jos h on yhtä suuri
+            //kuin sopivien huoneiden kokonaismäärä, niin tiedetään että vapaita huoneita ei ole
+
+            if (n == 1) {
+                int h;
+                h = 0;
+                for (int i = 1; i <= maara / 2; i++) {
+                    if (Huoneet[i].vapaus) {
+                        cout << "Huone " << i << " on vapaa!" << endl;
+                    }
+                    if (Huoneet[i].vapaus == false) {
+                        h++;
+                    }
+                    if (h == maara / 2) {
+                        cout << "Vapaita huoneita ei ole!" << endl;
+                        goto alku;
+                    }
+                }
+                Varaus(1);
+            }
+
+            if (n == 2) {
+                int h;
+                h = 0;
+                for (int i = 1 +( maara / 2); i <= maara; i++) {
+                    if (Huoneet[i].vapaus) {
+                        cout << "Huone " << i << " on vapaa!" << endl;
+                    }
+                    if (Huoneet[i].vapaus == false) {
+                        h++;
+                    }
+                    if (h == maara / 2) {
+                        cout << "Vapaita huoneita ei ole!" << endl;
+                        goto alku;
+                    }
+                }
+                Varaus(2);
+            }
+           
+        }
+
+
+        if (x == 2) {
+
+            //n on käyttäjän määrittelemä toiminto
+            int n;
+
+            cout <<endl << "Kuinka monen hengen huoneen haluatte? Syota 1 tai 2." << endl;
+            cout << "Jos haluatte palata paavalikkoon, painakaa 3." << endl;
+
+        tokaAlku:
+
+            cin >> n;
+
+            //Jos menee pieleen, niin tämä ratkaisee tilanteen
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(100000, '\n');
+                cout << endl << "Syottakaa 1, 2 tai 3!" << endl;
+                goto tokaAlku;
+            }
+
+            if (n == 3) {
+                goto alku;
+            }
+
+            if (n != 1 && n != 2) {
+                cout << endl << "Syottakaa 1, 2 tai 3!" << endl;
+                goto tokaAlku;
+            }
+
+            //Tässä tarkistetaan, että vapaita yhden- tai kahden hengen huoneita on olemassa.
+            //h on muuttuja, jota tarvitaan huoneiden vapauden tarkistamseen
+            int h;
+            h = 0;
+            if (n == 1) {
+                for (int i = 1; i <= maara / 2; i++) {
+                    if (Huoneet[i].vapaus == 0) {
+                        h++;
+                    }
+                    if (Huoneet[i].vapaus == 1) {
+                        //Nollataan h
+                        h = 0;
+                        break;
+                    }
+                    if (h == maara / 2) {
+                        cout << endl << "Valitettavasti yhtäkään sopivaa huoneetta ei loytynyt." << endl;
+                        goto alku;
+                    }
+                }
+            }
+
+
+            if (n == 2) {
+                for (int i = (maara / 2) + 1; i <= maara; i++) {
+                    if (Huoneet[i].vapaus == 0) {
+                        h++;
+                    }
+                    if (Huoneet[i].vapaus == 1) {
+                        h = 0;
+                        break;
+                    }
+                    if (h == maara / 2) {
+                        cout << endl << "Valitettavasti yhtäkään sopivaa huoneetta ei loytynyt." << endl;
+                        goto alku;
+                    }
+                }
+            }
+
+            //Tässä arvotaan ehdotettava huone, joka on yhden- tai kahden hengen huone
+            //v on satunnaismuuttuja, joka annetaan ehdotuksena, sitten kun se sattuu olemaan
+            //yhtä suuri kuin jokin vapaista huoneista
+            int v = 0;
+
+            //While looppeja toistetaan niin kauan kunnes vapaa huone osuu kohdalle
+
+            while(n == 1) {
+              v = rand() % maara / 2;
+              
+              if (Huoneet[v].vapaus) {
+                  break;
+              }
+            }
+
+            while (n == 2) {
+                v = rand() % maara + maara / 2;
+                if (Huoneet[v].vapaus) {
+                    break;
+                }
+            }
+
+        //Tässä kohtaa hoidetaa varaus
+        kolmasAlku:
+
+            cout << "Huone " << v << " olisi vapaa!" << endl;
+            cout << "Kuinka monta yota haluaisitte viettaa?" << endl;
+            cin >> Huoneet[v].oidenMaara;
+
+            //Virheentarkastus
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(1000000, '\n');
+                cout << endl << "Virheellien syote";
+                cout << endl;
+                goto kolmasAlku;
+            }
+
+            //Varmistetaan että varausaika on järkevällä aikavälillä
+            if (Huoneet[v].oidenMaara < 1) {
+                cout << "Huone pitaa varata vahintaan yhdeksi yoksi!" << endl;
+                goto kolmasAlku;
+            }
+            if (Huoneet[v].oidenMaara > 400) {
+                cout << "Huonetta ei voi varata noin pitkaksi aikaa!" << endl;
+                goto kolmasAlku;
+            }
+            cout << "Varaus maksaisi " << Huoneet[v].oidenMaara 
+                * Huoneet[v].hinta << " euroa." << endl;
+
+        neljasAlku:
+
+            cout << "Haluatteko varata huoneen? 1 = kylla, 2 = ei" << endl;
+            cin >> n;
+
+
+            //Jos menee pieleen, niin tämä ratkaisee tilanteen
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(100000, '\n');
+                cout << "Syota vain 1 tai 2" << endl;
+                cout << endl;
+                goto neljasAlku;
+            }
+
+            if (n == 1) {
+                Huoneet[v].vapaus = 0;
+                Huoneet[v].varauksenNimi = varaajanNimi;
+                Huoneet[v].varauksenNumero = varausnumero;
+                cout << "Huone on varattu! Maksu tapahtuu avaimen vastaanottamisessa." << endl;
+                goto alku;
+            }
+
+            if (n == 2) {
+                cout << "Huonetta ei varattu!" << endl;
+                goto alku;
+            }
+
+        }
+
+        if (x == 3) {
+
+            //Katsotan, että onko varauksia ollenkaan.
+            int k = 0;
+            for (int i = 1; i <= maara; i++) {
+                if (varausnumero == Huoneet[i].varauksenNumero) {
+                    break;
+                }
+                else if (varausnumero != Huoneet[i].varauksenNumero) {
+                    k++;
+                }
+                if (k == maara) {
+                    cout << "Varauksia ei ole!" << endl;
+                    goto alku;
+                }
+            }
+
+            int n;
+            
+        viidesAlku:
+
+            cout << endl;
+            cout << "Haluatteko hakea varauksia nimen vai varausnumeron perusteella? " << endl;
+            cout << "1 = Nimen perusteella." << endl;
+            cout << "2 = Varausnumeron perusteella." << endl;
+            cout << "3 = Takaisin valikkoon. " << endl;
+            cin >> n;
+
+            //Virheentarkastus
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(1000000, '\n');
+                cout << endl << "Virheellien syote";
+                cout << endl;
+                goto viidesAlku;
+            }
+
+            if (n == 1) {
+
+                //Katsotaan, että mitkä kaikki huoneet on varattu
+                //Tässä on täysin sama idea kuin varausnumeron kanssa hakemisella
+
+                    for (int i = 0; i <= maara; i++) {
+                        if (Huoneet[i].varauksenNimi == varaajanNimi) {
+                            //Tulostetaan kaikki tieto varauksesta
+                            cout << "Huone nro: " << i << "." << endl;
+
+                            //Tulostetaan yhden- tai kahden hengen huone riippuen boolean arvosta
+                            if (Huoneet[i].yksiHenki) {
+                                cout << "Yhden hengen huone." << endl;
+                            }
+                            else { cout << "Kahden hengen huone." << endl; }
+
+                            cout << "Hinta: " << Huoneet[i].hinta << " per yo." << endl;
+                            cout << "Oiden maara: " << Huoneet[i].oidenMaara << "." << endl;
+                            cout << "Maksettava lasku: " << Huoneet[i].oidenMaara 
+                                * Huoneet[i].hinta << "." << endl << endl;
+
+                        }
+                    }
+            }
+            if (n == 2) {
+                //Tässä on täysin sama idea kuin varausnimen kanssa hakemisella
+
+                    for (int i = 1; i <= maara; i++) {
+                        if (Huoneet[i].varauksenNumero == varausnumero) {
+                            //Tulostetaan kaikki tieto varauksesta
+                            cout << "Huone nro: " << i << "." << endl;
+
+                            //Tulostetaan yhden- tai kahden hengen huone riippuen boolean arvosta
+                            if (Huoneet[i].yksiHenki) {
+                                cout << "Yhden hengen huone." << endl;
+                            }
+                            else { cout << "Kahden hengen huone." << endl; }
+
+                            cout << "Hinta: " << Huoneet[i].hinta << " per yo." << endl;
+                            cout << "Oiden maara: " << Huoneet[i].oidenMaara << "." << endl;
+                            cout << "Maksettava lasku: " << Huoneet[i].oidenMaara
+                                * Huoneet[i].hinta << "." << endl << endl;
+
+                        }
+                    }
+            }
+            if (n == 3) {
+                goto alku;
+            }
+
+        }
+
+        if (x == 4) {
+
+            //Tässä kohtaa Luettelo pääsee hommiin
+            Luettelo();
+        }
+
+    }
+    return 0;
+}
+
+void Luettelo() {
+    //Tulostetaan kaikki varattujen huoneitten numerot
+    //samaan tapaan kun siinä "Katso varauksia osiossa, mutta 
+    //näytetään vain huoneitten numerot
+    //Katsotaaan samalla, onko varattuja huoneita ollenkaan
+
+    // h:n avulla lasketaan varaamattomia huoneita,
+    //Sen avulla tiedetään onko varattuja huoneita ollenkaan
+    //Edelleen sama idea kuin varauksien katsomisessa
+    int h = 0;
+
+    //Katsotaan onko yhtäkään huonetta varattu
+    for (int i = 1; i <= maara; i++) {
+        if (Huoneet[i].varauksenNumero != varausnumero) {
+            h++;
+        }
+        if (h == maara) {
+            cout << "Varauksia ei ole!" << endl;
+            return;
+        }
+    }
+    
+    cout << "Olet varannut seuraavat huoneet: " << endl;
+
+    //Tulostetaan varatut huoneet
+    for (int i = 1; i <= maara; i++) {
+        if (Huoneet[i].varauksenNumero == varausnumero) {
+            cout << "Huone nro " << i << endl;
+        }
+    }
+
+    cout << "Jos haluat lisaa tietoa varauksistasi, palaa paa valikkoon ja paina 3." << endl;
+
+kahdeksasAlku:
+
+    int n;
+    cout << "Minka varauksen haluaisit poistaa? Anna huoneen numero." << endl;
+    cout << "Jos haluatte palata paavalikkoon, painakaa 0" << endl;
+    cin >> n;
+
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(1000000, '\n');
+        cout << "Vriheellinen syote." << endl;
+        cout << endl;
+        goto kahdeksasAlku;
+    }
+    if (n == 0) {
+        return;
+    }
+
+
+    //Poistetaan varaus, jos se löytyy listalta
+    if (Huoneet[n].varauksenNumero == varausnumero) {
+            Huoneet[n].vapaus = 1;
+            Huoneet[n].varauksenNimi.clear();
+            Huoneet[n].varauksenNumero = 0;
+            Huoneet[n].oidenMaara = 0;
+
+            cout << "Varaus poistettu!" << endl;
+    }
+
+    else
+    {
+        cout << "Huone ei ole listalla!" << endl;
+        goto kahdeksasAlku;
+    }
+}
+
+void Varaus(int x) {
+
+    //x on 1 tai 2
+    // siitä tiedetään, että varataanko yhden vai kahden hengen huonetta
+
+    //Tässä kohtaa varataan huone
+
+    int o;
+    cout << endl << "Minka huoneen haluatte varata?" << endl;
+    cout << "Syottakaa huoneen numero." << endl;
+    cin >> o;
+
+    //Virheentarkistus
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(1000000, '\n');
+        cout << endl << "Virheellien syote";
+        cout << endl;
+    }
+
+    //Katotaan että onko o listalta
+    //h käytetään samalla tavalla kuin äskeisen listan luomisessa
+    int h;
+    h = 0;
+
+    //Samalla idealla kuin listan luomisessa, käydään sopivat huoneet läpi uudestaan
+    if (x == 1) {
+
+        for (int i = 1; i <= maara / 2; i++) {
+            if (i == o && Huoneet[i].vapaus == 1) {
+                //Öiden määrää kysytään kun huone löytyy listalta
+                //Vastaus saadaan kun kysytään haluaako käyttäjä oikeasti varata huoneen
+                int viipymisAika;
+                int vastaus;
+
+                //Menin sekaisin alkujen laskemisessa
+                moneskoAlku:
+
+                cout << "Kuinka monta yota haluaisitte viettaa? " << endl;
+                cin >> viipymisAika;
+
+
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(1000000, '\n');
+                    cout << endl << "Virheellien syote";
+                    cout << endl;
+                    goto moneskoAlku;
+                }
+
+                //Katsotaan että varaus aika on järkevällä aika välillä
+                if (viipymisAika < 1) {
+                    cout << "Huone pitaa varata vahintaan yhdeksi yoksi!" << endl;
+                    goto moneskoAlku;
+                }
+                if (viipymisAika > 400) {
+                    cout << "Huonetta ei voi varata noin pitkaksi aikaa!" << endl;
+                    goto moneskoAlku;
+                }
+                
+                cout << "Huoneen kokonaislasku olisi " <<
+                    viipymisAika * Huoneet[i].hinta << " euroa." << endl;
+                cout << "Haluatteko varata huoneen? " << endl;
+                cout << "1 = Kylla" << endl;
+                cout << "2 = Ei" << endl;
+                cin >> vastaus;
+
+
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(1000000, '\n');
+                    cout << endl << "Virheellien syote";
+                    cout << endl;
+                    break;
+                }
+
+                if (vastaus == 1) {
+
+                    cout << "Huone varattu! Maksu tapahtuu avaimen vastaanottamisessa." << endl;
+                    Huoneet[o].vapaus = 0;
+                    Huoneet[o].varauksenNimi = varaajanNimi;
+                    Huoneet[o].varauksenNumero = varausnumero;
+                    Huoneet[o].oidenMaara = viipymisAika;
+                }
+                if (vastaus == 2) {
+                    cout << "Huonetta ei varattu!" << endl;
+                }
+            }
+            else {
+                h++;
+            }
+            if (h == maara / 2) {
+                cout << "Huonetta ei ole listalla!" << endl;
+            }
+        }
+    }
+
+    if (x == 2) {
+
+        for (int i = 1+ (maara / 2); i <= maara; i++) {
+            if (i == o && Huoneet[i].vapaus == 1) {
+
+                //Öiden määrää kysytään kun huone löytyy listalta
+                //Vastaus saadaan kun kysytään haluaako käyttäjä oikeasti varata huoneen
+                int viipymisAika;
+                int vastaus;
+
+                //Tähän tullaan jos tarve vaatii
+            moneskoToinenAlku:
+
+                cout << "Kuinka monta yota haluaisitte viettaa? " << endl;
+                cin >> viipymisAika;
+
+                //Virheentarkastus
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(1000000, '\n');
+                    cout << endl << "Virheellien syote";
+                    cout << endl;
+                    break;
+                }
+
+                //Katsotaan että varaus aika on järkevällä aika välillä
+                if (viipymisAika < 1) {
+                    cout << "Huone pitaa varata vahintaan yhdeksi yoksi!" << endl;
+                    goto moneskoToinenAlku;
+                }
+                if (viipymisAika > 400) {
+                    cout << "Huonetta ei voi varata noin pitkaksi aikaa!" << endl;
+                    goto moneskoToinenAlku;
+                }
+
+
+                cout << "Huoneen kokonaislasku olisi " <<
+                    viipymisAika * Huoneet[i].hinta << " euroa." << endl;
+                cout << "Haluatteko varata huoneen? " << endl;
+                cout << "1 = Kylla" << endl;
+                cout << "2 = Ei" << endl;
+                cin >> vastaus;
+
+                //Virheentarkastus
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(1000000, '\n');
+                    cout << endl << "Virheellien syote";
+                    cout << endl;
+                    break;
+                }
+
+                if (vastaus == 1) {
+
+                    cout << "Huone varattu! Maksu tapahtuu avaimen vastaanottamisessa." << endl;
+                    Huoneet[o].vapaus = 0;
+                    Huoneet[o].varauksenNimi = varaajanNimi;
+                    Huoneet[o].varauksenNumero = varausnumero;
+                    Huoneet[o].oidenMaara = viipymisAika;
+                }
+                if (vastaus == 2) {
+                    cout << "Huonetta ei varattu!" << endl;
+                }
+            }
+            else {
+                h++;
+            }
+            if (h == maara / 2) {
+                cout << "Huonetta ei ole listalla!" << endl;
+            }
+        }
+    }
+}
