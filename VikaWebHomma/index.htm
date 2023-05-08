@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Weather Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <link rel="stylesheet" href="StyleSheet.css"/>
+</head>
+<body>
+    <a href="Temperature.htm" download style="color:black">Temperature</a>
+    <a href="wind.htm" download style="color:black">Wind speed</a>
+
+    <h3>Readings:</h3>
+
+    <table id="readings">
+        <tr>
+            <td>Readings</td>
+            <td>Values</td>
+            <td>Date</td>
+        </tr>
+    </table>
+
+    <table id="timespan">
+        <tr>
+            <td id="markNow"></td>
+            <td class="buttonHolder"><button id="now">Now</button></td>
+        </tr>
+        <tr>
+            <td id="mark24h"></td>
+            <td class="buttonHolder"><button id="24h">24h</button></td>
+        </tr>
+        <tr>
+            <td id="mark48h"></td>
+            <td class="buttonHolder"><button id="48h">48h</button></td>
+        </tr>
+        <tr>
+            <td id="mark72h"></td>
+            <td class="buttonHolder"><button id="72h">72h</button></td>
+        </tr>
+        <tr>
+            <td id="markWeek"></td>
+            <td class="buttonHolder"><button id="week">Week</button></td>
+        </tr>
+        <tr>
+            <td id="markMonth"></td>
+            <td class="buttonHolder"><button id="month">Month</button></td>
+        </tr>
+    </table>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="dropdown">
+        <button class="dropbtn">Select reading</button>
+        <div class="dropdown-content">
+            <a id="temperature">Temperature</a>
+            <a id="rain">Rain</a>
+            <a id="wind_speed">Wind speed</a>
+            <a id="50_readings">Latest readings</a>
+        </div>
+    </div>
+
+
+    <script>
+
+        document.getElementById("markNow").style.backgroundColor = "green";
+
+        //This keeps track of what data is show.
+        let info = 1;
+
+        //This clears table so we can add new stuff in.
+        function clearTable() {
+            document.getElementById("readings").innerHTML = '';
+        }
+
+        //Data for canvas. Arrays are filled in fetch
+
+        let canvasY = [];
+        let canvasX = [];
+
+        //Initialize chart
+        let ctx = document.getElementById('canvas').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: canvasX,
+                datasets: [{
+                    label: 'Temperature',
+                    data: canvasY,
+                    backgroundColor: "rgba(0,0,0,1.0)"
+                }]
+            },
+        });
+
+        let Clabel = '';
+
+        //Add data to chart, canvasX & Y come from fetch functions
+        function chartIt() {
+
+            myChart.destroy();
+
+            const ctx = document.getElementById('canvas').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: canvasX,
+                    datasets: [{
+                        label: Clabel,
+                        data: canvasY,
+                        backgroundColor: "rgba(0,0,0,1.0)"
+                    }]
+                },
+            });
+
+            canvasX = [];
+            canvasY = [];
+        }
+
+        //Temperature view + also initial view
+        fetchTemperature = async () => {
+            clearTable();
+            try {
+                const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature');
+                const data = await response.json();
+
+                let y = 19;
+                let c = 0;
+
+                while (y > -1) {
+
+                    let x = data[y]['temperature'];
+                    let d = data[y]['date_time']
+
+
+                    //Data to canvas
+                    canvasX[c] = d;
+                    canvasY[c] = x;
+
+                    //Data to table
+                    const newRow = document.createElement("tr");
+                    const newItem = document.createElement("td");
+                    const otherNewItem = document.createElement("td");
+                    const otherOtherNewItem = document.createElement("td");
+
+                    newItem.innerHTML = "Temperature:";
+                    otherNewItem.innerHTML = x;
+                    otherOtherNewItem.innerHTML = d;
+
+                    document.getElementById("readings").appendChild(newRow);
+                    newRow.appendChild(newItem);
+                    newRow.appendChild(otherNewItem);
+                    newRow.appendChild(otherOtherNewItem);
+
+                    c++;
+                    y--;
+                }
+            }
+            catch (error) {
+                console.error(error)
+            }
+            Clabel = "Temperature";
+            chartIt();
+
+            //This indicates that the timespan has been reset
+            document.getElementById("markNow").style.backgroundColor = "green";
+            document.getElementById("mark24h").style.backgroundColor = "white";
+            document.getElementById("mark48h").style.backgroundColor = "white";
+            document.getElementById("mark72h").style.backgroundColor = "white";
+            document.getElementById("markWeek").style.backgroundColor = "white";
+            document.getElementById("markMonth").style.backgroundColor = "white";
+
+            info = 2;
+        }
+
+        fetchTemperature();
+
+        //Rain view
+        fetchRain = async () => {
+
+            clearTable();
+            try {
+                const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain');
+                const data = await response.json();
+
+                let y = 19;
+                let c = 0;
+
+                while (y > -1) {
+
+                    let x = data[y]['rain'];
+                    let d = data[y]['date_time']
+
+
+                    //Data to canvas
+                    canvasX[c] = d;
+                    canvasY[c] = x;
+
+                    //Data to table
+                    const newRow = document.createElement("tr");
+                    const newItem = document.createElement("td");
+                    const otherNewItem = document.createElement("td");
+                    const otherOtherNewItem = document.createElement("td");
+
+                    newItem.innerHTML = "Rain:";
+                    otherNewItem.innerHTML = x;
+                    otherOtherNewItem.innerHTML = d;
+
+                    document.getElementById("readings").appendChild(newRow);
+                    newRow.appendChild(newItem);
+                    newRow.appendChild(otherNewItem);
+                    newRow.appendChild(otherOtherNewItem);
+
+                    c++;
+                    y--;
+                }
+            }
+            catch (error) {
+                console.error(error)
+            }
+            Clabel = "Rain";
+            chartIt();
+
+            //This indicates that the timespan has been reset
+            document.getElementById("markNow").style.backgroundColor = "green";
+            document.getElementById("mark24h").style.backgroundColor = "white";
+            document.getElementById("mark48h").style.backgroundColor = "white";
+            document.getElementById("mark72h").style.backgroundColor = "white";
+            document.getElementById("markWeek").style.backgroundColor = "white";
+            document.getElementById("markMonth").style.backgroundColor = "white";
+
+            info = 3;
+        }
+
+        //Wind speed view
+        fetchWind = async () => {
+            clearTable();
+            try {
+                const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed');
+                const data = await response.json();
+
+                let y = 19;
+                let c = 0;
+
+                while (y > -1) {
+
+                    let x = data[y]['wind_speed'];
+                    let d = data[y]['date_time']
+
+
+                    //Data to canvas
+                    canvasX[c] = d;
+                    canvasY[c] = x;
+
+                    //Data to table
+                    const newRow = document.createElement("tr");
+                    const newItem = document.createElement("td");
+                    const otherNewItem = document.createElement("td");
+                    const otherOtherNewItem = document.createElement("td");
+
+                    newItem.innerHTML = "Wind speed:";
+                    otherNewItem.innerHTML = x;
+                    otherOtherNewItem.innerHTML = d;
+
+                    document.getElementById("readings").appendChild(newRow);
+                    newRow.appendChild(newItem);
+                    newRow.appendChild(otherNewItem);
+                    newRow.appendChild(otherOtherNewItem);
+
+                    c++;
+                    y--;
+                }
+            }
+            catch (error) {
+                console.error(error)
+            }
+            Clabel = "Wind Speed";
+            chartIt();
+
+            //This indicates that the timespan has been reset
+            document.getElementById("markNow").style.backgroundColor = "green";
+            document.getElementById("mark24h").style.backgroundColor = "white";
+            document.getElementById("mark48h").style.backgroundColor = "white";
+            document.getElementById("mark72h").style.backgroundColor = "white";
+            document.getElementById("markWeek").style.backgroundColor = "white";
+            document.getElementById("markMonth").style.backgroundColor = "white";
+
+            info = 4;
+        } 
+
+        //50 readings
+        fetch50_readings = async () => {
+
+            clearTable();
+
+            try {
+                const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/limit/50');
+                const data = await response.json();
+
+                let y = 49;
+
+                while (y > -1) {
+                    let x = Object.keys(data[y]['data']);
+                    let a = data[y]['data'][x];
+
+                    let d = data[y]['date_time']
+
+                    //Data to table
+                    const newRow = document.createElement("tr");
+                    const newItem = document.createElement("td");
+                    const otherNewItem = document.createElement("td");
+                    const otherOtherNewItem = document.createElement("td");
+
+                    newItem.innerHTML = "Reading:";
+                    otherNewItem.innerHTML = x;
+                    otherOtherNewItem.innerHTML = d;
+
+                    document.getElementById("readings").appendChild(newRow);
+                    newRow.appendChild(newItem);
+                    newRow.appendChild(otherNewItem);
+                    newRow.appendChild(otherOtherNewItem);
+
+                    y--;
+                }
+            }
+            catch (error) {
+                console.error(error)
+            }
+            Clabel = "Chart feature not availavable for latest readings!";
+            chartIt();
+
+            //This indicates that the timespan has been reset
+            document.getElementById("markNow").style.backgroundColor = "green";
+            document.getElementById("mark24h").style.backgroundColor = "white";
+            document.getElementById("mark48h").style.backgroundColor = "white";
+            document.getElementById("mark72h").style.backgroundColor = "white";
+            document.getElementById("markWeek").style.backgroundColor = "white";
+            document.getElementById("markMonth").style.backgroundColor = "white";
+
+            info = 1;
+        }
+
+        //Functions under read info.
+        //Here is what each info value means
+
+        // 1 = 50 readings
+        // 2 = Temperature
+        // 3 = Rain
+        // 4 = Wind
+
+        function showNow() {
+            if (info == 1) {
+                fetch50_readings();
+            }
+            if (info == 2) {
+                fetchTemperature();
+            }
+            if (info == 3) {
+                fetchRain();
+            }
+            if (info == 4) {
+                fetchWind();
+            }
+        }
+        function show24hTime() {
+
+            if (info == 1) {
+                alert("Timespan cannot be altered for 50 readings.");
+            }
+            if (info == 2) {
+                //Temperature view last 24h
+                fetch24hTemperature = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature/24');
+                        const data = await response.json();
+
+                        let y = 23;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Temperature:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            c++;
+                            y--;
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "green";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch24hTemperature();
+            }
+            if (info == 3) {
+                //Rain view last 24h
+                fetch24hRain = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain/24');
+                        const data = await response.json();
+
+                        let y = 23;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Rain:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            c++;
+                            y--;
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //Set background color to indicate, which timespan is selected
+                    //We don't know which span was selected before se let's make it all white
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "green";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch24hRain();
+            }
+            if (info == 4) {
+                //Wind view last 24h
+                fetch24hWind = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed/24');
+                        const data = await response.json();
+
+                        let y = 23;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Wind speed:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            c++;
+                            y--;
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //Set background color to indicate, which timespan is selected
+                    //We don't know which span was selected before se let's make it all white
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "green";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch24hWind();
+            }
+        }
+        function show48hTime() {
+            if (info == 1) {
+                alert("Timespan cannot be altered for 50 readings.");
+            }
+            if (info == 2) {
+                //Temperature view last 48h
+                fetch48hTemperature = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature/48');
+                        const data = await response.json();
+
+                        let y = 48;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 48;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Temperature:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 2 so the loop only takes every other reading
+                            y = y - 2;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "green";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch48hTemperature();
+            }
+            if (info == 3) {
+                //Rain view last 48h
+                fetch48hRain = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain/48');
+                        const data = await response.json();
+
+                        let y = 48;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 48;
+
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Rain:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 2 so the loop only takes every other reading
+                            y = y - 2;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "green";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch48hRain();
+            }
+            if (info == 4) {
+                //Wind view last 48h
+                fetch48hWind = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed/48');
+                        const data = await response.json();
+
+                        let y = 48;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 48;
+
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Wind speed:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 2 so the loop only takes every other reading
+                            y = y - 2;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "green";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch48hWind();
+            }
+        }
+        function show72hTime() {
+            if (info == 1) {
+                alert("Timespan cannot be altered for 50 readings.");
+            }
+            if (info == 2) {
+                //Temperature view last 72h
+                fetch72hTemperature = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature/72');
+                        const data = await response.json();
+
+                        let y = 72;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time']
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 72/24 = 3, so we only take
+                        //every third reading
+
+                        //we use y again to loop through the file
+                        y = 72;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Temperature:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 3 so the loop only takes every third reading
+                            y = y - 3;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "green";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch72hTemperature();
+            }
+            if (info == 3) {
+                //Rain view last 72h
+                fetch72hRain = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain/72');
+                        const data = await response.json();
+
+                        let y = 72;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 72;
+
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Rain:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 3;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "green";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch72hRain();
+            }
+            if (info == 4) {
+                //Wind speed view last 72h
+                fetch72hWind = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed/72');
+                        const data = await response.json();
+
+                        let y = 72;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //we use y again to loop through the file
+                        y = 72;
+
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Wind speed:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 3;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //Set background color to indicate, which timespan is selected
+                    //We don't know which span was selected before se let's make it all white
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "green";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch72hWind();
+            }
+        }
+        function showWeek() {
+            if (info == 1) {
+                alert("Timespan cannot be altered for 50 readings.");
+            }
+            if (info == 2) {
+                //Temperature view last week(168h)
+                fetch168hTemperature = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature/168');
+                        const data = await response.json();
+
+                        let y = 168;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time']
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 168/24 = 7, so we only take
+                        //every seventh reading
+
+                        //we use y again to loop through the file
+                        y = 168;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Temperature:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 7 so the loop only takes every seventh reading
+                            y = y - 7;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "green";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch168hTemperature();
+            }
+            if (info == 3) {
+                //Rain view last 168h
+                fetchWeekRain = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain/168');
+                        const data = await response.json();
+
+                        let y = 168;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 168;
+
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Rain:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 7;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "green";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetchWeekRain();
+            }
+            if (info == 4) {
+                //Wind speed view last week(168h)
+                fetch168hWind = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed/168');
+                        const data = await response.json();
+
+                        let y = 168;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 168;
+
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Wind speed:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 7;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //Set background color to indicate, which timespan is selected
+                    //We don't know which span was selected before se let's make it all white
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "green";
+                    document.getElementById("markMonth").style.backgroundColor = "white";
+                }
+                fetch168hWind();
+            }
+        }
+        function showMonth() {
+            if (info == 1) {
+                alert("Timespan cannot be altered for 50 readings.");
+            }
+            if (info == 2) {
+                //Month
+                fetch720hTemperature = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/temperature/720');
+                        const data = await response.json();
+
+                        let y = 720;
+                        let c = 0;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time']
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 720/24 = 30, so we only take
+                        //every thirtieth reading
+
+                        //we use y again to loop through the file
+                        y = 720;
+
+                        while (y > -1) {
+
+                            let x = data[y]['temperature'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Temperature:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            //we negate 30 so the loop only takes every thirtieth reading
+                            y = y - 30;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "green";
+                }
+                fetch720hTemperature();
+            }
+            if (info == 3) {
+                //Rain view last 720h
+                fetchMonthRain = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/rain/720');
+                        const data = await response.json();
+
+                        let y = 720;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+
+                        //we use y again to loop through the file
+                        y = 720;
+
+                        while (y > -1) {
+
+                            let x = data[y]['rain'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Rain:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 30;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //We don't know which timespan was green, so let's make it all white,
+                    //exluding the one that is now selected
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "green";
+                }
+                fetchMonthRain();
+            }
+            if (info == 4) {
+                //Month
+                fetch720hWind = async () => {
+                    clearTable();
+                    try {
+                        const response = await fetch('https://webapi19sa-1.course.tamk.cloud/v1/weather/wind_speed/720');
+                        const data = await response.json();
+
+                        let y = 720;
+                        let c = 0;
+
+                        //Populate canvas with data
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+
+                            //Data to canvas
+                            canvasX[c] = d;
+                            canvasY[c] = x;
+
+                            c++;
+                            y--;
+                        }
+
+                        //Populate table with data
+                        //Table only has 24 slots and 48/24 = 2, so we only take
+                        //everyother reading
+
+                        //we use y again to loop through the file
+                        y = 720;
+
+                        while (y > -1) {
+
+                            let x = data[y]['wind_speed'];
+                            let d = data[y]['date_time'];
+
+                            //Data to table
+                            const newRow = document.createElement("tr");
+                            const newItem = document.createElement("td");
+                            const otherNewItem = document.createElement("td");
+                            const otherOtherNewItem = document.createElement("td");
+
+                            newItem.innerHTML = "Wind speed:";
+                            otherNewItem.innerHTML = x;
+                            otherOtherNewItem.innerHTML = d;
+
+                            document.getElementById("readings").appendChild(newRow);
+                            newRow.appendChild(newItem);
+                            newRow.appendChild(otherNewItem);
+                            newRow.appendChild(otherOtherNewItem);
+
+                            y = y - 30;
+
+                        }
+                    }
+                    catch (error) {
+                        console.error(error)
+                    }
+                    chartIt();
+
+                    //Set background color to indicate, which timespan is selected
+                    //We don't know which span was selected before se let's make it all white
+                    document.getElementById("markNow").style.backgroundColor = "white";
+                    document.getElementById("mark24h").style.backgroundColor = "white";
+                    document.getElementById("mark48h").style.backgroundColor = "white";
+                    document.getElementById("mark72h").style.backgroundColor = "white";
+                    document.getElementById("markWeek").style.backgroundColor = "white";
+                    document.getElementById("markMonth").style.backgroundColor = "green";
+                }
+                fetch720hWind();
+            }
+        }
+
+        document.getElementById("temperature").addEventListener("click", fetchTemperature);
+        document.getElementById("rain").addEventListener("click", fetchRain);
+        document.getElementById("wind_speed").addEventListener("click", fetchWind);
+        document.getElementById("50_readings").addEventListener("click", fetch50_readings);
+
+
+        document.getElementById("now").addEventListener("click", showNow);
+        document.getElementById("24h").addEventListener("click", show24hTime);
+        document.getElementById("48h").addEventListener("click", show48hTime);
+        document.getElementById("72h").addEventListener("click", show72hTime);
+        document.getElementById("week").addEventListener("click", showWeek);
+        document.getElementById("month").addEventListener("click", showMonth);
+
+    </script>
+</body>
