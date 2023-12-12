@@ -4,6 +4,7 @@
 
 Made by: Antti Tanskanen
 
+The purpose of this project is to gather data from a sensor and display it on a website
 
 ///////RELEASE NOTES///////////////////////
 
