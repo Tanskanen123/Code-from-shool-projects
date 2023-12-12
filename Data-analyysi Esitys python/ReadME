@@ -1,0 +1,1 @@
+This directory houses my data-analysis python project. It's purpose is to pick data from a database regarding olympic medals won by Finland, make a graph and then use machine learning to predict future winnings. Suomen_olympia_ennuste contains Python code for analysing data and Mitalit.ppx is a slide show I made from the findings.
